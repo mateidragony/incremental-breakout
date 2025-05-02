@@ -1,0 +1,11 @@
+#+TITLE: Idle breakout todos
+#+AUTHOR: Matei Cloteaux
+* TODO [#B] Clicking of blocks
+* TODO [#D] Prestige
+* TODO [#B] Buying balls
+* TODO [#B] Buying upgrades
+* TODO [#B] Better display
+** TODO [#B] Display money
+** TODO [#B] Display level number
+** TODO [#C] Display number of balls
+* TODO [#C] Powerups

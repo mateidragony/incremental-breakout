@@ -1,0 +1,18 @@
+{
+	"include" : ["src/**/*"],
+	"compilerOptions": {
+		"target": "esnext",
+		"module": "ESNext",
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"declaration": true,
+		"sourceMap": true,
+		"allowUnreachableCode": true,
+		"allowUnusedLabels": false,
+		"exactOptionalPropertyTypes": true,
+		"strictNullChecks": true,
+		"strictPropertyInitialization": true,
+		"incremental": true,
+		"outDir": "js"
+	}
+}
