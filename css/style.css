@@ -1,19 +1,391 @@
 :root {
-	
+	--green: #0ebf66;
+	--yellow: #FFFF66;
+
+	--background : #F4D39A;
+
+	--main-width: 900px;
 }
 
 
+button:hover {
+	cursor: pointer !important;
+	filter: brightness(0.9) !important;
+}
+
+button:active {
+	filter: brightness(0.8) !important;
+}
+
+.upgrade-tooltip {
+	--bs-tooltip-arrow-height: 0;
+	--bs-tooltip-border-radius: 0;
+
+	font-family: monospace;
+	font-size: 9pt;
+}
+
 main {
-	margin: 0 auto;
+	margin: 50px auto;
+	padding: 20px;
+
+	background-color: var(--background);
 	
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	max-width: 1000px;
-	
-	canvas {
-		border: black solid 2px;
-		width: 90%;
+	max-width: var(--main-width);
+
+	.top-bar {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		
+		width: 100%;
+		margin-bottom: 10px;
+		
+		.ball-butts {
+			button {
+				all: unset;
+
+				position: relative;
+				
+				width: 70px;
+				height: 70px;
+
+				border: solid black 2px;
+
+				.img {
+					position: absolute;
+					top: 0;
+
+					display: flex;
+					justify-content: center;
+					align-items: center;
+					
+					width: 100%;
+					height: 52px;
+
+					background-color: white;
+
+					svg {
+						width: 35px;
+					}
+				}
+
+				.cost {
+					position: absolute;
+					bottom: 0;
+
+					box-sizing: border-box;
+					
+					width: 100%;
+					height: 18px;
+
+					border-top: solid black 2px;
+					background-color: #ddd;
+
+					.cost-bar {
+						position: absolute;
+
+						height: 100%;
+						background-color: var(--green);
+
+						z-index: 0;
+					}
+
+					.cost-label {
+						margin: 0;
+						height: fit-content;
+
+						position: relative;
+
+						line-height: 16px;
+						text-align: center;
+						font-family: 'monospace';
+						font-size: 10pt;
+
+						z-index: 1;
+					}
+				}
+			}
+		}
+
+		.stats {
+			.currencies {
+				display: flex;
+				flex-direction: column;
+				gap: 5px;
+				
+				box-sizing: border-box;
+				
+				width: 180px;
+				height: 100%;
+
+				padding: 3px;
+
+				background-color: white;
+				border: solid black 2px;
+
+				.currency {
+					display: flex;
+					align-items: center;
+					flex-grow: 1;
+					gap: 5px;
+					margin-left: 2px;
+
+					.icon {
+						display: flex;
+						justify-content: center;
+						align-items: center;
+
+						width: 30px;
+						
+						box-sizing: border-box;
+					}
+
+					.label {
+						flex-grow: 1;
+						margin: 0;
+						height: fit-content;
+
+						box-sizing: border-box;
+						
+						border: solid black 2px;
+						padding: 1px 5px;
+
+						text-align: right;
+
+						font-family: 'monospace';
+					}
+				}
+
+				.money .label {
+					background-color: var(--green);
+				}
+
+				.bricks .label {
+					background-color: var(--yellow);
+				}
+			} 
+		}
 	}
 
+	.menu-bar {
+		display: flex;
+		width: 100%;
+		margin: 10px 0;
+
+		button {
+			all: unset;
+
+			padding: 2px 5px 4px;
+			border: solid black 2px;
+			border-radius: 4px;
+
+			background-color: #f9eac0;
+			
+			font-family: 'monospace';
+			font-size: 11pt;
+		}
+	}
+	
+	canvas {
+		width: 100%;
+	}
+
+}
+
+.modal {
+	.modal-dialog {
+		max-width: var(--main-width);
+		
+		.modal-content {
+			background-color: var(--background);
+			font-family: monospace;
+
+			.modal-header {
+				border-bottom: none;
+			}
+
+			.modal-body {
+				.ball {
+					display: flex;
+					align-items: center;
+					gap: 10px;
+
+					p {
+						margin: 0;
+						font-weight: bold;
+						font-size: 12pt;
+						width: 90px;
+					}
+					
+					.img {
+						display: flex;
+						align-items: center;
+						background-color: white;
+						width: 60px;
+						padding: 10px;
+						border: solid black 2px;
+					}
+
+					.stats {
+						font-weight: normal;
+						font-size: 10pt;
+						width: fit-content;
+						margin-right: 30px;
+					}
+
+
+					.upgrade {
+						all: unset;
+						position: relative;
+						text-align: center;
+						
+						border: solid black 2px;
+
+						background-color: #f9eac0;
+						
+						font-family: 'monospace';
+						font-size: 11pt;
+
+						margin-right: 30px;
+
+						p {
+							font-weight: normal;
+						}
+						
+						.label {
+							margin: 5px 0 25px;
+							line-height: 11pt;
+						}
+						
+						.cost {
+							position: absolute;
+							bottom: 0;
+
+							box-sizing: border-box;
+							
+							width: 100%;
+							height: 18px;
+
+							border-top: solid black 2px;
+							background-color: #ddd;
+
+							.cost-bar {
+								position: absolute;
+
+								height: 100%;
+								background-color: var(--green);
+
+								z-index: 0;
+							}
+
+							.cost-label {
+								margin: 0;
+								height: fit-content;
+
+								position: relative;
+
+								line-height: 16px;
+								text-align: center;
+								font-family: 'monospace';
+								font-size: 10pt;
+
+								z-index: 1;
+							}
+						}
+					}
+
+					.one-off, .special {
+						display: flex;
+						flex-direction: column;
+						align-items: center;
+						gap: 5px;
+						
+						button {
+							all: unset;
+
+							position: relative;
+							width: 40px;
+							height: 40px;
+
+							background-color: white;
+							border: solid black 2px;
+
+							svg {
+								width: 100%;
+								height: 100%;
+							}
+						}
+
+						button[data-purchase-state="disabled"] {
+							filter: brightness(0.2) !important;
+							cursor: unset !important;
+						}
+
+						button[data-purchase-state="enabled"] {
+							filter: brightness(1) !important;
+							cursor: pointer !important;
+						}
+
+						button[data-purchase-state="enabled"]:hover {
+							filter: brightness(0.9) !important;
+							cursor: pointer !important;
+						}
+
+						button[data-purchase-state="enabled"]:active {
+							filter: brightness(0.8) !important;
+							cursor: pointer !important;
+						}
+
+						button[data-purchase-state="purchased"] {
+							filter: brightness(1) !important;
+							cursor: unset !important;
+						}
+
+						button[data-purchase-state="purchased"]::after {
+							/* Check mark */
+							content: url("data:image/svg+xml,%3Csvg height='30px' width='30px' version='1.1' id='_x32_' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' viewBox='0 0 512 512' xml:space='preserve'%3E%3Cstyle type='text/css'%3E .st0%7Bfill:%230ebf66;%7D%0A%3C/style%3E%3Cg%3E%3Cpolygon class='st0' points='440.469,73.413 218.357,295.525 71.531,148.709 0,220.229 146.826,367.055 218.357,438.587 289.878,367.055 512,144.945 '/%3E%3C/g%3E%3C/svg%3E");
+							font-weight: bolder;
+							font-size: 30px;
+							color: var(--green);
+							position: absolute;
+							top: -20px;
+							right: -15px;
+						}
+
+						
+						.label {
+							font-weight: normal;
+							font-size: 8pt;
+							text-align: center;
+							width: 60px;
+						}
+					}
+				}
+			}
+			
+			.modal-footer {
+				border-top: none;
+				display: flex;
+				justify-content: center;
+				
+				button {
+					all: unset;
+
+					padding: 2px 5px 4px;
+					border: solid black 2px;
+					border-radius: 4px;
+
+					background-color: #f9eac0;
+					
+					font-family: 'monospace';
+					font-size: 11pt;
+
+				}
+			}
+		}
+	}
 }

@@ -1,33 +1,58 @@
 'use strict'
 
 import { Canvas } from './canvas.js'
-import { State, Tile, Wall, Ball, Brick } from './objects.js'
-
+import { State, Tile, Wall, Ball, Brick, Cursor } from './objects.js'
+import { DisplayUtils, CostBarUpgrade, BallUpgradeRow, SpecialUpgrade } from './components.js'
 
 class Game {
-	canvas  : Canvas
+	canvas        : Canvas
+	cursor        : Cursor
+	cursor_power  : number
 	tile_sz : number
 	tilemap : Tile[][]
 	balls   : Ball[]
 	walls   : Wall[]
 	bricks  : Brick[]
 	level   : number
+	money   : number
+	bricks_broken : number
+	ball_level : number
+	ball_speed : number
 	
-	constructor(canvas : Canvas) {
+	ball_buy_button       : CostBarUpgrade
+	ball_upgrade_button   : CostBarUpgrade
+	ball_special_upgrades : SpecialUpgrade[]
+	ball_upgrade_row      : BallUpgradeRow
+	
+	constructor(canvas : Canvas, cursor : Cursor) {
 		this.canvas = canvas
+		this.cursor = cursor
+
+		this.cursor_power = 1
+		this.money = 0
+		this.bricks_broken = 0
 		this.level = 0
 		this.tile_sz = 12
-		this.tilemap = []
-		this.init_tilemap()
-		this.walls = []
-		this.init_walls()
-		this.bricks = []
-		this.init_bricks()
+
+		this.ball_level = 1
+		this.ball_speed = 1
+
+		this.ball_buy_button     = new CostBarUpgrade(25, 1.5, "Buy basic ball", null, 'basic_ball')
+		this.ball_upgrade_button = new CostBarUpgrade(200, 2, "Power<br/>1 >> 2", "Level up", null)
+		this.ball_special_upgrades = [new SpecialUpgrade('speed_upgrade', 0, 0),
+									  new SpecialUpgrade('speed_upgrade', 100, 0),
+									  new SpecialUpgrade('speed_upgrade', 100, 20)]
+		this.ball_upgrade_row = new BallUpgradeRow('basic_ball', this.ball_upgrade_button, this.ball_special_upgrades)
 		
-		this.balls = []
-		for (let i=0; i!=10; ++i) {
-			this.balls.push(new Ball(30, 30, "yellow"))
-		}
+		this.tilemap = []
+		this.walls   = []
+		this.bricks  = []
+		this.balls   = []
+
+		this.init_tilemap()
+		this.init_walls()
+		this.init_bricks()
+		this.init_html()
 	}
 
 	init_tilemap() {
@@ -153,14 +178,63 @@ class Game {
 					this.bricks.push(new Brick(i * brick_h + 1, j * brick_w-1, brick_w, brick_h, this.level+1, this.tilemap, this.tile_sz))
 				}
 			}
-
-
 		}
 	}
 
+	init_basic_ball_components() {
+		document.querySelector('.ball-butts')!.appendChild(this.ball_buy_button.button);
+		this.ball_buy_button.set_onclick(() => {
+			this.balls.push(new Ball(this.canvas.width/2, this.canvas.height/2, "yellow", this.ball_level, this.ball_speed))
+		}, this)
+
+		
+		this.ball_upgrade_row.update_level(this.ball_upgrade_row.level, {'Power':  this.ball_level, 'Speed': this.ball_speed})
+		document.querySelector('.upgrades-modal')!.appendChild(this.ball_upgrade_row.container)
+		this.ball_upgrade_button.set_onclick(() => {
+			this.ball_level++
+			this.balls.forEach(b => b.damage = this.ball_level)
+			this.ball_upgrade_button.set_tooltip(`Power<br/>${this.ball_level} >> ${this.ball_level+1}`)
+			this.ball_upgrade_row.update_level(this.ball_upgrade_row.level+1, {'Power':  this.ball_level, 'Speed': this.ball_speed})
+		}, this)
+
+		this.ball_special_upgrades.forEach(o => o.set_onclick(() => {
+			this.ball_speed*=2
+			this.balls.forEach(b => b.speed = this.ball_speed)
+			this.ball_upgrade_row.update_level(this.ball_upgrade_row.level, {'Power':  this.ball_level, 'Speed': this.ball_speed})
+		}, this))
+	}
+
+	init_tooltips() {
+		const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+		// @ts-ignore
+		[...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+	}
+	
+	init_modals() {		
+		// @ts-ignore
+		const upgrades = new bootstrap.Modal('#upgrades', {})
+		const upgrades_butt = document.querySelector('button[data-bs-target="#upgrades"]')! as HTMLButtonElement
+		// upgrades.show()
+		upgrades_butt.onclick = () => upgrades.show()
+		
+	}
+
+	init_html() {
+		this.init_basic_ball_components()
+		this.init_tooltips()
+		this.init_modals()
+	}
+	
+	click() {
+		const obj = this.cursor.collided_obj(this.tilemap, this.tile_sz)
+		if (obj instanceof Brick) {
+			obj.hit(this.cursor_power, this.tilemap, this)
+		}
+	}
+	
 	update() {
 		for(let ball of this.balls) {
-			ball.update(this.tilemap, this.tile_sz)
+			ball.update(this.tilemap, this.tile_sz, this)
 		}
 
 		this.balls = State.remove_defunct(this.balls) as Ball[]
@@ -170,32 +244,37 @@ class Game {
 			this.level++
 			this.init_bricks()
 		}
+
+		this.ball_special_upgrades.forEach(u => u.update(this.bricks_broken, this.level))
 	}
 	
 	draw() {
 		const ctx = this.canvas.ctx
 		Canvas.fill_rect(0, 0, this.canvas.width, this.canvas.height, "gray", ctx, false)
-		
-		for (let ball of this.balls) {
-			ball.draw(ctx)
-		}
 
-		for (let wall of this.walls) {
-			wall.draw(ctx)
-		}
+		this.balls.forEach(b => b.draw(ctx))
+		this.walls.forEach(w => w.draw(ctx))
+		this.bricks.forEach(b => b.draw(ctx))
+	}
 
-		for (let brick of this.bricks) {
-			brick.draw(ctx)
-		}
+	html_display() {
+		// stats
+		document.querySelector('.money .label')!.innerHTML  = `${DisplayUtils.numerical_string(this.money)}`
+		document.querySelector('.bricks .label')!.innerHTML = `${DisplayUtils.numerical_string(this.bricks_broken)}`
+
+		this.ball_buy_button.set_cost_bar(this.money)
+		this.ball_upgrade_button.set_cost_bar(this.money)
 	}
 	
 	run() {
-		let game_interval = setInterval(() => {
+		this.money = 999999999
+		setInterval(() => {
 			this.update()
 			this.draw()
+			this.html_display()
 		}, 1000/60)
 	}
 }
 
 
-export { Game }
+export { Cursor, Game }

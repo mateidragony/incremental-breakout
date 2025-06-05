@@ -1,6 +1,7 @@
 'use strict'
 
 import { Canvas } from "./canvas.js"
+import { Game } from "./game.js"
 
 /**
  * State objects store what state a current object
@@ -9,7 +10,7 @@ import { Canvas } from "./canvas.js"
  * means the object is no longer used and should be
  * cleaned up.
  *
- * Everything should extend state.
+ * Every game object should extend state.
  */
 class State {
 	static INUSE   = 0
@@ -81,8 +82,25 @@ class Collider extends State {
 		let rect_bot   = rect.y + rect.h/2
 
         return this_left < rect_right && this_right > rect_left &&
-			this_top < rect_bot && this_bot > rect_top
+    		   this_top  < rect_bot   && this_bot   > rect_top
     }
+
+	collided_obj(tilemap: Tile[][], tile_sz: number): Collider | null {
+		let left_tile = Math.max(Math.floor((this.x - this.w / 2) / tile_sz), 0)
+		let right_tile = Math.min(Math.floor((this.x + this.w / 2) / tile_sz), tilemap[0].length - 1)
+		let top_tile = Math.max(Math.floor((this.y - this.h / 2) / tile_sz), 0)
+		let bottom_tile = Math.min(Math.floor((this.y + this.h / 2) / tile_sz), tilemap.length - 1)
+
+		for (let i = left_tile; i <= right_tile; ++i) {
+			for (let j = top_tile; j <= bottom_tile; ++j) {
+				let tile = tilemap[j][i];
+				if (tile.object != null && this.detect_collision(tile.object)) {
+					return tile.object
+				}
+			}
+		}
+		return null
+	}
 }
 
 /**
@@ -144,9 +162,12 @@ class Brick extends TiledCollider {
 		this.num = num
 	}
 
-	hit(damage : number, tilemap : Tile[][]) {
+	hit(damage : number, tilemap : Tile[][], game : Game) {
+		damage = Math.min(this.num, damage)
 		this.num -= damage
-		if (this.num <= 0) {
+		game.money += damage
+		if (this.num == 0) {
+			game.bricks_broken++
 			this.state = State.DEFUNCT
 			Tile.set_tiles(tilemap, null, this.r, this.c, this.tile_w, this.tile_h)
 		}
@@ -154,7 +175,7 @@ class Brick extends TiledCollider {
 
 	draw(ctx : CanvasRenderingContext2D) {
 		let gap = 4
-		let color = `hsl(${this.num*10 + 50}, 100%, 50%)`
+		let color = `hsl(${this.num*30 + 30}, 100%, 70%)`
 		Canvas.draw_rect(this.x, this.y, this.w-gap, this.h-gap, 'black', ctx, true, 3, 2)
 		Canvas.fill_rect(this.x, this.y, this.w-gap, this.h-gap, color, ctx, true, 2)
 		Canvas.draw_text(this.x, this.y, 15, `${this.num}`, 'black', ctx)
@@ -174,7 +195,7 @@ class Ball extends Collider {
 	dy     : number
 	damage : number
 
-	constructor(x : number, y : number, color : string, size=10, speed=5, damage=1) {
+	constructor(x : number, y : number, color : string, damage : number, speed : number, size=10) {
 		super(x, y, size*2, size*2)
 		this.x = x
 		this.y = y
@@ -188,30 +209,13 @@ class Ball extends Collider {
 
 		this.damage = damage
 	}
-
-	collided_obj(tilemap : Tile[][], tile_sz : number) : Collider | null {
-        let left_tile   = Math.max(Math.floor((this.x - this.w/2) / tile_sz), 0)
-        let right_tile  = Math.min(Math.floor((this.x + this.w/2) / tile_sz), tilemap[0].length-1)
-        let top_tile    = Math.max(Math.floor((this.y - this.h/2) / tile_sz), 0)
-        let bottom_tile = Math.min(Math.floor((this.y + this.h/2) / tile_sz), tilemap.length-1)
-
-        for(let i=left_tile; i<=right_tile; ++i) {
-            for(let j=top_tile; j<=bottom_tile; ++j){
-                let tile = tilemap[j][i];
-				if (tile.object != null && this.detect_collision(tile.object)) {
-					return tile.object
-				}
-            }
-        }
-		return null
-    }
 	
 	draw(ctx : CanvasRenderingContext2D) : void {
 		Canvas.fill_circle(this.x, this.y, this.size, this.color, ctx)
 		Canvas.draw_circle(this.x, this.y, this.size, "black", ctx)
 	}
 
-	update(tilemap : Tile[][], tile_sz : number) : void {
+	update(tilemap : Tile[][], tile_sz : number, game : Game) : void {
         const num_steps = this.speed
         let dx_step = this.dx * this.speed / num_steps
         let dy_step = this.dy * this.speed / num_steps
@@ -230,7 +234,7 @@ class Ball extends Collider {
 			}
 
 			if (tile_obj instanceof Brick) {
-				tile_obj.hit(this.damage, tilemap)
+				tile_obj.hit(this.damage, tilemap, game)
 			}
 			
 			this.y += dy_step
@@ -242,7 +246,7 @@ class Ball extends Collider {
 			}
 
 			if (tile_obj instanceof Brick) {
-				tile_obj.hit(this.damage, tilemap)
+				tile_obj.hit(this.damage, tilemap, game)
 			}
 
 			if (collided_x || collided_y) break;
@@ -250,4 +254,18 @@ class Ball extends Collider {
 	}
 }
 
-export { State, Tile, Wall, Brick, Ball }
+class Cursor extends Collider {
+	pressed : boolean
+
+	constructor() {
+		super(0, 0, 10, 10)
+		this.pressed = false
+	}
+
+	draw(ctx : CanvasRenderingContext2D) : void {
+		Canvas.fill_circle(this.x, this.y, 10, "red", ctx)
+	}
+}
+
+
+export { State, Tile, Wall, Brick, Ball, Cursor }

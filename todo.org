@@ -1,11 +1,73 @@
 #+TITLE: Idle breakout todos
 #+AUTHOR: Matei Cloteaux
-* TODO [#B] Clicking of blocks
-* TODO [#D] Prestige
-* TODO [#B] Buying balls
-* TODO [#B] Buying upgrades
-* TODO [#B] Better display
-** TODO [#B] Display money
-** TODO [#B] Display level number
-** TODO [#C] Display number of balls
-* TODO [#C] Powerups
+
+List of todo items for incremental breakout
+
+* Functionality
+Basic game functionality including
+ball breaking, money, prestige,
+upgrades, etc.
+
+** General functionality
+General functionality todos
+
+*** TODO [#B] Local Storage
+Store the game state in local storage
+*** TODO [#D] Importing and exporting game saves
+Export to txt file and import txt files
+
+** Basic game interatcion
+Interactions with the game and canvas
+
+*** DONE [#B] Clicking of blocks
+CLOSED: [2025-05-05 Mon 15:44]
+- State "DONE"       from "TODO"       [2025-05-05 Mon 15:44]
++ Clicking blocks to delete them
++ Click power
+
+*** TODO [#D] Prestige
++ Reseting the game and earning new
+  currencies.
++ Passive effects from that
+  currency.
++ Purchasing and upgrading "ancients" that
+  give unique powerups.
+  
+*** TODO [#D] Powerups
++ You can buy and use timed powerups
+
+*** TODO [#D] Bosses
++ Every ten levels you fight a boss which has
+  a timer.
++ Beyond some level you can get more currency
+  after a prestige.
+
+** Game upgrades
+
+*** IN-PROGRESS [#B] Buying balls
+- State "IN-PROGRESS" from "TODO"       [2025-05-05 Mon 16:35] \\
+  You can buy basic balls
++ Buying new balls.
++ Different balls have different abilities
+
+*** IN-PROGRESS [#C] Ball upgrades
++ Upgrades to ball power.
++ Every x upgrades you can buy a "special" ball
+  upgrade which could increase speed or some other
+  ball power
+
+* Game Display
+Visible game UI (canvas, buttons, styling)
+
+** DONE [#B] Money display
+CLOSED: [2025-05-05 Mon 16:35]
+- State "DONE"       from "TODO"       [2025-05-05 Mon 16:35]
++ Display the amount of money and other currencies the
+  user has.
+
+** TODO [#B] Level number display
++ Display the level the user is on
+
+** TODO [#B] Number of balls display
++ Display the number of balls the user has and the limit
+  of the number of balls
